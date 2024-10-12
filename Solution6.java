@@ -41,43 +41,61 @@ import java.util.Set;
  * 所有字符串仅包含小写英文字母。
  *
  */
-class Solution6 {
-    Set<String>[] s = new Set[105];
-
+public class Solution6 {
     public List<Integer> peopleIndexes(List<List<String>> favoriteCompanies) {
-        for (int i = 1; i < 105; ++i) {
-            s[i] = new HashSet<String>();
-        }
-        int n = favoriteCompanies.size()-1;
-        List<Integer> ans = new ArrayList<Integer>();
-
-        for (int i = 0; i < n; ++i) {
-            for (String com : favoriteCompanies.get(i)) {
-                s[i].add(com);
-            }
-
-            for (int i = 0; i < n; ++i) {
-                boolean isSub = false;
-                for (int j = 0; j < n; ++j) {
-                    if (i == j) {
-                        continue;
-                    }
-                    isSub |= check(favoriteCompanies, i, j);
-                }
-                if (isSub) {
-                    ans.add(i);
-                }
-            }
-
-            return ans;
+        List<Set<String>> sets = new ArrayList<>();
+        // 将每个用户的公司清单转换为HashSet，以便进行子集检查
+        for (List<String> list : favoriteCompanies) {
+            sets.add(new HashSet<>(list));
         }
 
-        public boolean check(List<List<String>> favoriteCompanies, int x, int y) {
-            for (String com : favoriteCompanies.get(x)) {
-                if (!s[y].contains(com)) {
-                    return false;
+        List<Integer> ans = new ArrayList<>();
+        // 逐个检查每个HashSet是否是其他HashSet的子集
+        for (int i = 0; i < sets.size(); i++) {
+            boolean isSubset = false;
+            for (int j = 0; j < sets.size(); j++) {
+                if (i != j && sets.get(j).containsAll(sets.get(i))) {
+                    // 注意这里是检查sets.get(i)是否是sets.get(j)的子集
+                    // 如果sets.get(i)是sets.get(j)的子集，则标记为isSubset = true并退出内层循环
+                    isSubset = true;
+                    break;
                 }
             }
-            return true;
+            // 如果当前HashSet不是任何其他HashSet的子集，则添加到结果列表中
+            if (!isSubset) {
+                ans.add(i);
+            }
         }
+
+        return ans;
     }
+
+    // 测试类
+    public static void main(String[] args) {
+        Solution6 solution = new Solution6();
+
+        // 测试用例1
+        List<List<String>> favoriteCompanies1 = new ArrayList<>();
+        favoriteCompanies1.add(List.of("leetcode", "google", "facebook"));
+        favoriteCompanies1.add(List.of("google", "microsoft"));
+        favoriteCompanies1.add(List.of("google", "facebook"));
+        favoriteCompanies1.add(List.of("google"));
+        favoriteCompanies1.add(List.of("amazon"));
+        System.out.println("Test case 1: " + solution.peopleIndexes(favoriteCompanies1)); // Output: [0, 1, 4]
+
+        // 测试用例2
+        List<List<String>> favoriteCompanies2 = new ArrayList<>();
+        favoriteCompanies2.add(List.of("leetcode", "google", "facebook"));
+        favoriteCompanies2.add(List.of("leetcode", "amazon"));
+        favoriteCompanies2.add(List.of("facebook", "google"));
+        System.out.println("Test case 2: " + solution.peopleIndexes(favoriteCompanies2)); // Output: [0, 1]
+
+        // 测试用例3
+        List<List<String>> favoriteCompanies3 = new ArrayList<>();
+        favoriteCompanies3.add(List.of("leetcode"));
+        favoriteCompanies3.add(List.of("google"));
+        favoriteCompanies3.add(List.of("facebook"));
+        favoriteCompanies3.add(List.of("amazon"));
+        System.out.println("Test case 3: " + solution.peopleIndexes(favoriteCompanies3)); // Output: [0, 1, 2, 3]
+    }
+}
